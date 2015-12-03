@@ -1,35 +1,92 @@
-var gulp = require('gulp');
+'use strict'
 
-var jshint = require('gulp-jshint');
+var
+  gulp = require('gulp')
+  ,imagemin = require('gulp-imagemin')
+  ,clean = require('gulp-clean')
+  ,concat = require('gulp-concat')
+  ,htmlReplace = require('gulp-html-replace')
+  ,uglify = require('gulp-uglify')
+  ,usemin = require('gulp-usemin')
+  ,minifycss = require('gulp-minify-css')
+  ,browserSync = require('browser-sync')
 
-var changed = require('gulp-changed');
+  // ,blah = require('gulp-blah')
+;
 
-var imagemin = require('gulp-imagemin');
+gulp.task('server', function () {
+  browserSync.init({
+    server: {
+      baseDir: 'dist'
+    }
+  });
 
-var clean = require('gulp-clean');
-
-gulp.task('jshint', function() {
-  gulp.src('./src/app/scripts/*.js')
-    .pipe(jshint())
-    .pipe(jshint.reporter('default'));
+  gulp.watch('dist/**/*').on('change', browserSync.reload);
 });
 
-gulp.task('imagemin', function() {
+gulp.task('default', ['copy'], function() {
+  gulp.start(
+    // 'build-js',
+    // 'build-html'
+    'usemin'
+  );
+});
 
-  var imgSrc = './src/app/images/**.*';
-
-  var imgDest = './build/images';
-
-  gulp.src(imgSrc)
-    .pipe(changed(imgDest))
+gulp.task('imagemin', function () {
+  gulp
+    .src('src/img/**/*')
     .pipe(imagemin())
-    .pipe(gulp.dest(imgDest)).on('error', function(err) {
-      console.log(err);
-    });
-
+    .pipe(gulp.dest('src/img'));
 });
 
-gulp.task('clean', function() {
-  return gulp.src('app/tmp', {read: false})
-        .pipe(clean());
+gulp.task('copy', ['clean'], function () {
+  return gulp
+    .src('src/**/*')
+    .pipe(gulp.dest('dist'));
 });
+
+gulp.task('clean', function () {
+  return gulp
+    .src('dist')
+    .pipe(clean());
+});
+
+gulp.task('usemin', function () {
+  return gulp
+    .src('dist/**/*.html')
+    .pipe(usemin({
+      js: [uglify()],
+      css: [minifycss()]
+      // inlinejs: [uglify()],
+      // inlinecss: [minifycss(), 'concat']
+    }))
+    .pipe(gulp.dest('dist'));
+  ;
+});
+
+// gulp.task('build-js', function () {
+//   gulp
+//     .src('dist/js/**/*.js')
+//     .pipe(concat('scripts.js'))
+//     .pipe(uglify())
+//     .pipe(gulp.dest('dist/js'));
+// });
+
+// gulp.task('build-html', function () {
+//   gulp
+//     .src('dist/**/*.html')
+//     .pipe(htmlReplace({
+//       'js': 'js/scripts.js'
+//     }))
+//     .pipe(gulp.dest('dist/'));
+//   ;
+// });
+
+/*
+
+gulp.task('xxxxxxx', function () {
+  gulp.src('');
+});
+
+*/
+
